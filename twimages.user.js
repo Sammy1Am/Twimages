@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twimages
 // @namespace    https://github.com/SammyIAm
-// @version      0.3.0
+// @version      0.3.1
 // @description  Inline images (and other extras) for Twitch Chat
 // @author       Sammy1Am
 // @match        http://www.twitch.tv/*
@@ -16,6 +16,12 @@
 var lastMessage = null; // Last message processed.
 var imageRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))/i; // Which image links to embed as an img tag
 var twitchUsername = getTwitchUsername(); // Get username from GM value storage
+
+// Meta tag for iframes to prevent sending referrer (and fix imgur redirects)
+var referrerBlock = document.createElement("meta");
+referrerBlock.name = "referrer";
+referrerBlock.content = "never";
+
 
 // Attempt to get a stored username, or prompt for a new one.
 function getTwitchUsername() {
@@ -39,26 +45,38 @@ function getNewMessages(){
     }
 }
 
-function processMessage(messageDiv){
+function embedImages(messageDiv){
     var message = messageDiv.getElementsByClassName("message")[0];
-    var imageUrl = message.textContent.match(imageRegex);
-    if (imageUrl != null){
+    var imageUrlMatches = message.textContent.match(imageRegex);
+    
+    if (imageUrlMatches != null){
+        var imageUrl = imageUrlMatches[0]
+        
+        var imageFrame = document.createElement("iframe");
+        
+        // Insert right after the message <span>
+        message.parentElement.appendChild(imageFrame); // Append early to initialize content body
+        imageFrame.style.height = "122px"; // (Just enough room for the image and its border)
+        imageFrame.style.border = "none";
+        imageFrame.contentDocument.head.appendChild(referrerBlock);
+        imageFrame.contentDocument.body.style.margin = "0px";
+        
         // Create link so you can link to the URL
         var imageInsert = document.createElement("a");
-        imageInsert.href = imageUrl[0];
+        imageInsert.href = imageUrl;
+        imageInsert.target = "_blank";
         imageInsert.style.display = "block";
         
         // Create image that's reasonably sized
         var newImage = document.createElement("img");
-        newImage.src = imageUrl[0];
+        newImage.src = imageUrl;
         newImage.style.border = "1px solid black";
         newImage.style.maxHeight = "120px";
         newImage.style.maxWidth = "100%";
         
         imageInsert.appendChild(newImage);
-        
-        // Insert right after the message <span>
-        message.parentElement.appendChild(imageInsert);
+
+        imageFrame.contentDocument.body.appendChild(imageInsert);
     }
 }
 
@@ -71,7 +89,7 @@ function highlightUsername(messageDiv){
 
 var refreshInterval = setInterval(function(){
     getNewMessages().forEach(function(newMessage){
-        processMessage(newMessage);
+        embedImages(newMessage);
         highlightUsername(newMessage);
     });
 }, 500);
