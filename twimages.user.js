@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Twimages
 // @namespace    https://github.com/SammyIAm
-// @version      0.2
+// @version      0.2.1
 // @description  Inline images (and other extras) for Twitch Chat
 // @author       Sammy1Am
 // @match        http://www.twitch.tv/*
+// @grant        none
 // ==/UserScript==
 /* jshint -W097 */
 'use strict';
