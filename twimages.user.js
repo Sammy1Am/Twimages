@@ -1,19 +1,29 @@
 // ==UserScript==
 // @name         Twimages
 // @namespace    https://github.com/SammyIAm
-// @version      0.2.1
+// @version      0.3.0
 // @description  Inline images (and other extras) for Twitch Chat
 // @author       Sammy1Am
 // @match        http://www.twitch.tv/*
-// @grant        none
+// @grant        GM_getValue
+// @grant        GM_setValue
 // ==/UserScript==
 /* jshint -W097 */
 'use strict';
 
 //debugger;
 
-var lastMessage = null;
-var imageRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))/i;
+var lastMessage = null; // Last message processed.
+var imageRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))/i; // Which image links to embed as an img tag
+var twitchUsername = getTwitchUsername(); // Get username from GM value storage
+
+// Attempt to get a stored username, or prompt for a new one.
+function getTwitchUsername() {
+    if (GM_getValue("twimage_username",null) == null || GM_getValue("twimage_username", null) == ""){
+        GM_setValue("twimage_username", prompt("Twimages: Please enter your Twitch username for chat highlighting.", ""));
+    }
+    return GM_getValue("twimage_username",null);
+}
 
 function getNewMessages(){
     if (lastMessage == null){
@@ -52,8 +62,16 @@ function processMessage(messageDiv){
     }
 }
 
+function highlightUsername(messageDiv){
+    var message = messageDiv.getElementsByClassName("message")[0];
+    if (message.textContent.toLowerCase().indexOf(twitchUsername.toLowerCase()) > -1){
+        message.style.backgroundColor = "#C4B3DB";
+    }
+}
+
 var refreshInterval = setInterval(function(){
     getNewMessages().forEach(function(newMessage){
         processMessage(newMessage);
+        highlightUsername(newMessage);
     });
 }, 500);
