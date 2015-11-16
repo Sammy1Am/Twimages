@@ -3,6 +3,10 @@
 
 This is a userscript that requires either Greasemonkey for Firefox, or Tampermonkey for Chrome.  I imagine it will work in other contexts as well, but those are the only two userscript plugins I've tested it with.
 
+## Features
+* Inserts images sent as links into the chat
+* Highlights messages containing your username
+
 ## Installation
 * Install Greasemonkey or Tampermonkey (depending on your browser of choice)
 * Click [here](https://github.com/SammyIAm/Twimages/raw/master/twimages.user.js) (or on the "raw" link on the [source page for the twimages.user.js](https://github.com/SammyIAm/Twimages/blob/master/twimages.user.js) file)
