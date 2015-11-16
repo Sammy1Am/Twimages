@@ -31,7 +31,7 @@ function getNewMessages(){
 
 function processMessage(messageDiv){
     var message = messageDiv.getElementsByClassName("message")[0];
-    var imageUrl = message.innerText.match(imageRegex);
+    var imageUrl = message.textContent.match(imageRegex);
     if (imageUrl != null){
         // Create link so you can link to the URL
         var imageInsert = document.createElement("a");
@@ -56,4 +56,4 @@ var refreshInterval = setInterval(function(){
     getNewMessages().forEach(function(newMessage){
         processMessage(newMessage);
     });
-}, 1000);
+}, 500);
