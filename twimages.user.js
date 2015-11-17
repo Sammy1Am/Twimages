@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twimages
 // @namespace    https://github.com/SammyIAm
-// @version      0.4.2
+// @version      0.4.3
 // @description  Inline images (and other extras) for Twitch Chat
 // @author       Sammy1Am
 // @match        http://www.twitch.tv/*
@@ -16,6 +16,7 @@
 var lastMessage = null; // Last message processed.
 var imageRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))/i; // Which image links to embed as an img tag
 var twitchUsername = getTwitchUsername(); // Get username from GM value storage
+var chatLines = document.getElementsByClassName("chat-lines")[0]; // The chat-lines ul element (containing all the chatlines)
 
 // Meta tag for iframes to prevent sending referrer (and fix imgur redirects)
 var referrerBlock = document.createElement("meta");
@@ -31,10 +32,11 @@ function getTwitchUsername() {
     return GM_getValue("twimage_username",null);
 }
 
+// Gets all the new messages after the last one we've processed (or all the messages if we haven't processed any)
 function getNewMessages(){
     if (lastMessage == null){
-        lastMessage = document.getElementsByClassName("chat-lines")[0].children[document.getElementsByClassName("chat-lines")[0].children.length-1];
-        return Array.prototype.slice.call(document.getElementsByClassName("chat-lines")[0].children);
+        lastMessage = chatLines.children[chatLines.children.length-1];
+        return Array.prototype.slice.call(chatLines.children);
     } else {
         var nextMessages = [];
         while (lastMessage.nextElementSibling != null){
@@ -45,6 +47,7 @@ function getNewMessages(){
     }
 }
 
+// Searches for image links in the message and inserts the image below the message
 function embedImages(messageDiv){
     var message = messageDiv.getElementsByClassName("message")[0];
     var imageUrlMatches = message.textContent.match(imageRegex);
@@ -80,6 +83,7 @@ function embedImages(messageDiv){
     }
 }
 
+// Searches for the configured username and highlights the message if it contains the name
 function highlightUsername(messageDiv){
     var message = messageDiv.getElementsByClassName("message")[0];
     if (message.textContent.toLowerCase().indexOf(twitchUsername.toLowerCase()) > -1){
@@ -87,6 +91,7 @@ function highlightUsername(messageDiv){
     }
 }
 
+// Adds a clickable '@' link next to each username
 function addReplyLink(messageDiv){
     var fromSpan = messageDiv.getElementsByClassName("from")[0];
     var replyLink = document.createElement("a");
@@ -97,17 +102,31 @@ function addReplyLink(messageDiv){
     });
     messageDiv.getElementsByTagName("li")[0].insertBefore(replyLink, fromSpan);
 }
-
+// Triggered when '@' link clicked on
 function onReplyLinkClick(replyUsername){
     var chatTextArea = document.getElementsByClassName("ember-text-area")[0];
     chatTextArea.value = '@' + replyUsername + ': ';
     chatTextArea.focus();
 }
 
-var refreshInterval = setInterval(function(){
+// Function to find and process new messages (triggered by update)
+function processNewMessages(){
     getNewMessages().forEach(function(newMessage){
         embedImages(newMessage);
         highlightUsername(newMessage);
         addReplyLink(newMessage);
     });
-}, 500);
+}
+
+// Firefox doesn't seem to like the observer, so we'll fallback to a safe polling-style for non-Chrome
+if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1){
+    // Set up observer to trigger processing each time a new message is added
+    var observer = new MutationObserver(processNewMessages);
+    var config = { attributes: false, childList: true, characterData: false };
+    observer.observe(chatLines, config);
+} else {
+    var refreshInterval = setInterval(function(){
+       chatLines = document.getElementsByClassName("chat-lines")[0];
+       processNewMessages();
+    }, 500);
+};
