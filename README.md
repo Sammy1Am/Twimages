@@ -14,7 +14,7 @@ This is a userscript that requires either Greasemonkey for Firefox, or Tampermon
 * Enter Twitch chat, and enjoy!
 
 ## Configuration
-There's no preferences/settings available yet, but if you want to turn a particular feature off, you can edit the script and comment out the appropriate line in the processNewMessages() function.  (e.g. put a `//` in front of `hightlightUsername(newMessage);` to turn off username highlighting.
+There's no preferences/settings available yet, but if you want to turn a particular feature off, you can edit the script and comment out the appropriate line in the processNewMessages() function.  (e.g. put a `//` in front of `highlightUsername(newMessage);` to turn off username highlighting.)
 
 ## Troubleshooting / Issues
 Feel free to submit questions, issues, suggestions, pull requests, etc. to this Git repo.
