@@ -6,6 +6,7 @@ This is a userscript that requires either Greasemonkey for Firefox, or Tampermon
 ## Features
 * Inserts images sent as links into the chat
 * Highlights messages containing your username
+* Provides an "@" link by usernames to quickly reply to a user in chat
 
 ## Installation
 * Install Greasemonkey or Tampermonkey (depending on your browser of choice)
