@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twimages
 // @namespace    https://github.com/SammyIAm
-// @version      0.3.1
+// @version      0.4.0
 // @description  Inline images (and other extras) for Twitch Chat
 // @author       Sammy1Am
 // @match        http://www.twitch.tv/*
@@ -87,9 +87,27 @@ function highlightUsername(messageDiv){
     }
 }
 
+function addReplyLink(messageDiv){
+    var fromSpan = messageDiv.getElementsByClassName("from")[0];
+    var replyLink = document.createElement("a");
+    replyLink.innerHTML = "@";
+    replyLink.style.cursor = "pointer";
+    replyLink.addEventListener('click', function(){
+        onReplyLinkClick(fromSpan.textContent);
+    });
+    messageDiv.getElementsByTagName("li")[0].insertBefore(replyLink, fromSpan);
+}
+
+function onReplyLinkClick(replyUsername){
+    var chatTextArea = document.getElementsByClassName("ember-text-area")[0];
+    chatTextArea.value = '@' + replyUsername + ': ';
+    chatTextArea.focus();
+}
+
 var refreshInterval = setInterval(function(){
     getNewMessages().forEach(function(newMessage){
         embedImages(newMessage);
         highlightUsername(newMessage);
+        addReplyLink(newMessage);
     });
 }, 500);
