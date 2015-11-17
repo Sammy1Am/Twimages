@@ -35,8 +35,8 @@ function getTwitchUsername() {
 // Gets all the new messages after the last one we've processed (or all the messages if we haven't processed any)
 function getNewMessages(){
     if (lastMessage == null){
-        lastMessage = chatLines.children[chatLines.children.length-1];
-        return Array.prototype.slice.call(chatLines.children);
+        lastMessage = document.getElementsByClassName("chat-lines")[0].children[document.getElementsByClassName("chat-lines")[0].children.length-1];
+        return Array.prototype.slice.call(document.getElementsByClassName("chat-lines")[0].children);
     } else {
         var nextMessages = [];
         while (lastMessage.nextElementSibling != null){
