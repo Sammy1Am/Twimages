@@ -5,6 +5,7 @@
 // @description  Inline images (and other extras) for Twitch Chat
 // @author       Sammy1Am
 // @match        http://www.twitch.tv/*
+// @match        https://www.twitch.tv/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
@@ -26,7 +27,7 @@ referrerBlock.content = "never";
 
 // Attempt to get a stored username, or prompt for a new one.
 function getTwitchUsername() {
-    if (GM_getValue("twimage_username",null) == null || GM_getValue("twimage_username", null) == ""){
+    if (GM_getValue("twimage_username",null) === null || GM_getValue("twimage_username", null) === ""){
         GM_setValue("twimage_username", prompt("Twimages: Please enter your Twitch username for chat highlighting.", ""));
     }
     return GM_getValue("twimage_username",null);
@@ -34,12 +35,12 @@ function getTwitchUsername() {
 
 // Gets all the new messages after the last one we've processed (or all the messages if we haven't processed any)
 function getNewMessages(){
-    if (lastMessage == null){
+    if (lastMessage === null){
         lastMessage = chatLines.children[chatLines.children.length-1];
         return Array.prototype.slice.call(chatLines.children);
     } else {
         var nextMessages = [];
-        while (lastMessage.nextElementSibling != null){
+        while (lastMessage.nextElementSibling !== null){
             nextMessages.push(lastMessage.nextElementSibling);
             lastMessage = lastMessage.nextElementSibling;
         }
@@ -51,32 +52,32 @@ function getNewMessages(){
 function embedImages(messageDiv){
     var message = messageDiv.getElementsByClassName("message")[0];
     var imageUrlMatches = message.textContent.match(imageRegex);
-    
-    if (imageUrlMatches != null){
+
+    if (imageUrlMatches !== null){
         var imageUrl = imageUrlMatches[0]
-        
+
         var imageFrame = document.createElement("iframe");
-        
+
         // Insert right after the message <span>
         message.parentElement.appendChild(imageFrame); // Append early to initialize content body
         imageFrame.style.height = "122px"; // (Just enough room for the image and its border)
         imageFrame.style.border = "none";
         imageFrame.contentDocument.head.appendChild(referrerBlock);
         imageFrame.contentDocument.body.style.margin = "0px";
-        
+
         // Create link so you can link to the URL
         var imageInsert = document.createElement("a");
         imageInsert.href = imageUrl;
         imageInsert.target = "_blank";
         imageInsert.style.display = "block";
-        
+
         // Create image that's reasonably sized
         var newImage = document.createElement("img");
         newImage.src = imageUrl;
         newImage.style.border = "1px solid black";
         newImage.style.maxHeight = "120px";
         newImage.style.maxWidth = "100%";
-        
+
         imageInsert.appendChild(newImage);
 
         imageFrame.contentDocument.body.appendChild(imageInsert);
@@ -100,7 +101,7 @@ function addReplyLink(messageDiv){
     replyLink.addEventListener('click', function(){
         onReplyLinkClick(fromSpan.textContent);
     });
-    messageDiv.getElementsByTagName("li")[0].insertBefore(replyLink, fromSpan);
+    messageDiv.getElementsByTagName("span")[0].insertBefore(replyLink, fromSpan);
 }
 // Triggered when '@' link clicked on
 function onReplyLinkClick(replyUsername){
@@ -114,14 +115,14 @@ function processNewMessages(){
     getNewMessages().forEach(function(newMessage){
         embedImages(newMessage);
         highlightUsername(newMessage);
-        addReplyLink(newMessage);
+        //addReplyLink(newMessage); // Not working yet, something changed
     });
 }
 
 // Find the chat-lines and set up observer or 
 function initialize(){
     chatLines = document.getElementsByClassName("chat-lines")[0];
-    
+
     // Firefox doesn't seem to like the observer, so we'll fallback to a safe polling-style for non-Chrome
     if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1){
         // Set up observer to trigger processing each time a new message is added
