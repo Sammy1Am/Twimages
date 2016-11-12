@@ -54,16 +54,7 @@ function embedImages(messageDiv){
     var imageUrlMatches = message.textContent.match(imageRegex);
 
     if (imageUrlMatches !== null){
-        var imageUrl = imageUrlMatches[0]
-
-        var imageFrame = document.createElement("iframe");
-
-        // Insert right after the message <span>
-        message.parentElement.appendChild(imageFrame); // Append early to initialize content body
-        imageFrame.style.height = "122px"; // (Just enough room for the image and its border)
-        imageFrame.style.border = "none";
-        imageFrame.contentDocument.head.appendChild(referrerBlock);
-        imageFrame.contentDocument.body.style.margin = "0px";
+        var imageUrl = imageUrlMatches[0];
 
         // Create link so you can link to the URL
         var imageInsert = document.createElement("a");
@@ -80,7 +71,7 @@ function embedImages(messageDiv){
 
         imageInsert.appendChild(newImage);
 
-        imageFrame.contentDocument.body.appendChild(imageInsert);
+        message.appendChild(imageInsert);
     }
 }
 
@@ -119,7 +110,7 @@ function processNewMessages(){
     });
 }
 
-// Find the chat-lines and set up observer or 
+// Find the chat-lines and set up observer or refresh timer
 function initialize(){
     chatLines = document.getElementsByClassName("chat-lines")[0];
 
@@ -141,6 +132,6 @@ function initialize(){
 var waitForChatLines = setInterval(function(){
     if (document.getElementsByClassName("chat-lines").length > 0){
         initialize();
+		clearInterval(waitForChatLines);
     }
-    clearInterval(waitForChatLines);
-}, 500);
+}, 5000); // This has to be longer than 1 second for Firefox (for some reason?)
